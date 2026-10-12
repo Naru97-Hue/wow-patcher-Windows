@@ -1,0 +1,30 @@
+name: Build Windows
+
+on:
+  workflow_dispatch:        # lets you run it manually from the Actions tab
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # build.rs reads git tags for the version string
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build release
+        run: cargo build --release --locked
+
+      - name: Upload wow-patcher.exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-patcher-windows-x64
+          path: target/release/wow-patcher.exe
